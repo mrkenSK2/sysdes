@@ -6,6 +6,7 @@
     <input type="radio" name="is_done" value="t" {{ if .Task.IsDone }}checked{{ end }}><label>完了</label>
     <input type="radio" name="is_done" value="f" {{ if not .Task.IsDone }}checked{{ end }}><label>未完了</label>
     </br>
+    <textarea name="detail">{{ .Task.Detail }}</textarea>
     <input type="submit" value="更新">
     <a href="/task/{{ .Task.ID }}"><button type="button">戻る</button></a>
 </form>

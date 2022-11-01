@@ -41,9 +41,9 @@ func main() {
 	engine.POST("/task/new", service.RegisterTask)
 	// existing task edit
 	engine.GET("/task/edit/:id", service.EditTaskForm)
-    engine.POST("/task/edit/:id", service.NotImplemented)
+    engine.POST("/task/edit/:id", service.UpdateTask)
 	// existing task delete
-    engine.GET("/task/delete/:id", service.NotImplemented)
+    engine.GET("/task/delete/:id", service.DeleteTask)
 
 	// start server
 	engine.Run(fmt.Sprintf(":%d", port))

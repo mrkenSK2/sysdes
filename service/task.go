@@ -122,3 +122,73 @@ func EditTaskForm(ctx *gin.Context) {
         gin.H{"Title": fmt.Sprintf("Edit task %d", task.ID), "Task": task})
 }
 
+func UpdateTask(ctx *gin.Context) {
+
+    id, err := strconv.Atoi(ctx.Param("id"))
+    if err != nil {
+        Error(http.StatusBadRequest, err.Error())(ctx)
+        return
+    }
+
+    // Get task title
+    title, exist := ctx.GetPostForm("title")
+    if !exist {
+        Error(http.StatusBadRequest, "No title is given")(ctx)
+        return
+    }
+	is_done_bool, exist := ctx.GetPostForm("is_done")
+    if !exist {
+        Error(http.StatusBadRequest, "No data in done")(ctx)
+        return
+    }
+	is_done, err := strconv.ParseBool(is_done_bool)
+	if err != nil {
+        Error(http.StatusBadRequest, err.Error())(ctx)
+        return
+    }
+	detail, exist := ctx.GetPostForm("detail")
+    // Get DB connection
+    db, err := database.GetConnection()
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+	// Create new data with given title on DB
+    //cmd := "UPDATE tasks SET title=?,is_done=?,detail=? WHERE id=?"
+    //result, err := db.Prepare("UPDATE tasks SET title=?,is_done=?,detail=? WHERE id=?")
+    _, err = db.Exec("UPDATE tasks SET title=?,is_done=?,detail=? WHERE id=?", title, is_done, detail, id)
+    //result.Exec(title, is_done, detail, id)
+    //result, err := db.Exec(cmd, title,is_done, detail, id)
+
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+	 // Render status
+		 path := fmt.Sprintf("/task/%d", id)   // 正常にIDを取得できた場合は /task/<id> へ戻る
+	 ctx.Redirect(http.StatusFound, path)
+}
+
+func DeleteTask(ctx *gin.Context) {
+    //var task database.Task
+    // ID の取得
+    id, err := strconv.Atoi(ctx.Param("id"))
+    if err != nil {
+        Error(http.StatusBadRequest, err.Error())(ctx)
+        return
+    }
+    // Get DB connection
+    db, err := database.GetConnection()
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    // Delete the task from DB
+    _,err = db.Exec("DELETE FROM tasks WHERE id=?", id)
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    // Redirect to /list
+    ctx.Redirect(http.StatusFound, "/list")
+}
