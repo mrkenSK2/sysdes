@@ -37,10 +37,10 @@ func main() {
 	engine.GET("/task/:id", service.ShowTask) // ":id" is a parameter
 
 	// adding new task
-	engine.GET("/task/new", service.NotImplemented)
-	engine.POST("/task/new", service.NotImplemented)
+	engine.GET("/task/new", service.NewTaskForm)
+	engine.POST("/task/new", service.RegisterTask)
 	// existing task edit
-	engine.GET("/task/edit/:id", service.NotImplemented)
+	engine.GET("/task/edit/:id", service.EditTaskForm)
     engine.POST("/task/edit/:id", service.NotImplemented)
 	// existing task delete
     engine.GET("/task/delete/:id", service.NotImplemented)
