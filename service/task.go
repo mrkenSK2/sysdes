@@ -165,8 +165,8 @@ func UpdateTask(ctx *gin.Context) {
         return
     }
 	 // Render status
-		 path := fmt.Sprintf("/task/%d", id)   // 正常にIDを取得できた場合は /task/<id> へ戻る
-	 ctx.Redirect(http.StatusFound, path)
+		 //path := fmt.Sprintf("/task/%d", id)   // 正常にIDを取得できた場合は /task/<id> へ戻る
+	 ctx.Redirect(http.StatusFound, "/list")
 }
 
 func DeleteTask(ctx *gin.Context) {

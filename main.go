@@ -42,6 +42,7 @@ func main() {
 	// existing task edit
 	engine.GET("/task/edit/:id", service.EditTaskForm)
     engine.POST("/task/edit/:id", service.UpdateTask)
+	engine.GET("/task/update/:id", service.UpdateTask)
 	// existing task delete
     engine.GET("/task/delete/:id", service.DeleteTask)
 
