@@ -36,14 +36,15 @@ func main() {
 	engine.GET("/list", service.TaskList)
 	engine.GET("/task/:id", service.ShowTask) // ":id" is a parameter
 
-	// adding new task
+	// add new task
 	engine.GET("/task/new", service.NewTaskForm)
 	engine.POST("/task/new", service.RegisterTask)
-	// existing task edit
+	
+	// edit existing task
 	engine.GET("/task/edit/:id", service.EditTaskForm)
     engine.POST("/task/edit/:id", service.UpdateTask)
-	engine.GET("/task/update/:id", service.UpdateTask)
-	// existing task delete
+	
+	// delete existing task
     engine.GET("/task/delete/:id", service.DeleteTask)
 
 	// start server

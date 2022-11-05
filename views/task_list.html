@@ -1,5 +1,16 @@
 {{ template "header" . }}
 <h1>List of tasks</h1>
+<form action="/list" method="GET">
+    <input type="checkbox" id="kw_check" name="check">
+    <input type="text" name="kw" value="{{ .Kw }}">
+    <input type="submit" value="検索">
+    <br>
+    <input type="checkbox" id="done" name="done">
+    <label for="done">完了</label>
+    <input type="checkbox" id="notdone" name="notdone">
+    <label for="notdone">未完了</label>
+</form>
+
 <p><a href="/task/new">新規登録</a></p>
 {{ if not .Tasks }}
 <p>登録データがありません．</p>

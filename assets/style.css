@@ -1,1 +1,10 @@
 /* placeholder file for CSS */
+/*textarea{
+    vertical-align:top;
+}*/
+textarea {
+    vertical-align:top;
+    resize: none;
+    width:300px;
+    height:200px;
+  }
