@@ -1,10 +1,17 @@
 /* placeholder file for CSS */
-/*textarea{
-    vertical-align:top;
-}*/
 textarea {
-    vertical-align:top;
     resize: none;
     width:300px;
     height:200px;
-  }
+}
+
+.task_dt {
+    text-align: right;
+    float: left ;
+    clear: left ;
+    margin-right: 0.1em;
+    width: 100px ;
+}
+.radio_done{
+    margin-left: 105px;
+}

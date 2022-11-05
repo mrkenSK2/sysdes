@@ -20,27 +20,29 @@ func TaskList(ctx *gin.Context) {
 
     // Get query parameter
     kw := ctx.Query("kw")
-    kw_check := ctx.Query("kw_check")
     done := ctx.Query("done")
     notdone := ctx.Query("notdone")
-    //kw_check := ctx.("kw_check")
-    //if checkedtxt == "on" {}else{}
-    
 
 	// Get tasks in DB
 	var tasks []database.Task
 
-    if done=="on" && kw_check!="on"{
-        db.Select(&tasks, "SELECT * FROM tasks WHERE is_done LIKE 1")
-    }else if notdone=="on" && kw_check!="on"{
-        db.Select(&tasks, "SELECT * FROM tasks WHERE is_done LIKE 0")
-    }else {
-        switch{
-            case kw != "":
+    switch{
+        case kw != "":
+            if(done=="on" && notdone=="on" || (done!="on" && notdone!="on")){
                 err = db.Select(&tasks, "SELECT * FROM tasks WHERE title LIKE ?", "%" + kw + "%")
-	        default:
+            }else if(done=="on"){
+                err = db.Select(&tasks, "SELECT * FROM tasks WHERE title LIKE ? AND is_done = 1", "%" + kw + "%")
+            }else{
+                err = db.Select(&tasks, "SELECT * FROM tasks WHERE title LIKE ? AND is_done = 0", "%" + kw + "%")
+            }
+        default:
+            if(done=="on" && notdone=="on" || done!="on" && notdone!="on"){
                 err = db.Select(&tasks, "SELECT * FROM tasks") // Use DB#Select for multiple entries
-	    }
+            }else if(done=="on"){
+                err = db.Select(&tasks, "SELECT * FROM tasks WHERE is_done = 1")
+            }else{
+                err = db.Select(&tasks, "SELECT * FROM tasks WHERE is_done = 0")
+            }
     }
     if err != nil {
 		Error(http.StatusInternalServerError, err.Error())(ctx)
@@ -48,7 +50,7 @@ func TaskList(ctx *gin.Context) {
 	}
 
 	// Render tasks
-	ctx.HTML(http.StatusOK, "task_list.html", gin.H{"Title": "Task list", "Tasks": tasks, "Kw": kw})
+	ctx.HTML(http.StatusOK, "task_list.html", gin.H{"Title": "Task list", "Tasks": tasks, "Kw": kw, "Done": done, "NotDone": notdone})
 }
 
 // ShowTask renders a task with given ID
