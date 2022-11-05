@@ -1,13 +1,13 @@
 {{ template "header" . }}
 <h1>タスクの新規登録</h1>
 <form action="/task/new" method="POST">
-    <div>
-    <label>Title</label><input type="text" name="title" required>
-    <br>
-    <label>Description</label>
-    <textarea name="detail"></textarea>
-</div>
-    <input type="submit" value="登録">
-    <a href="/list"><button type="button">戻る</button></a>
+    <dl>
+        <dt class="task_dt">タイトル</dt>
+        <dd><input type="text" name="title" required ></dd>
+        <dt class="task_dt">説明文</dt>
+        <dd><textarea name="detail"></textarea></dd>
+    </dl>
+    <input type="submit" value="登録" style="position: absolute; left: 321px; top: 344px">
+    <a href="/list"><button type="button" style="position: absolute; left: 371px; top: 344px">戻る</button></a>
 </form>
 {{ template "footer" }}

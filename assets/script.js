@@ -8,7 +8,6 @@ const confirm_delete = (id) => {
 const confirm_update = (id) => {
     // 練習問題 7-2
     if(window.confirm(`Task ${id} を更新します．よろしいですか？`)) {
-        //location.href = `/task/edit/${id}`;
         return true;
     }else{
         return false;
