@@ -24,11 +24,14 @@ func RegisterUser(ctx *gin.Context) {
     // フォームデータの受け取り
     username := ctx.PostForm("username")
     password := ctx.PostForm("password")
+    re_enter_password := ctx.PostForm("re_enter_password")
     switch {
         case username == "":
             ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Usernane is not provided", "Username": username})
         case password == "":
             ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password is not provided", "Password": password})
+        case re_enter_password == "":
+            ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Confirm password is not provided", "Re_enter_Password": re_enter_password})
     }
     
     // DB 接続
@@ -46,7 +49,13 @@ func RegisterUser(ctx *gin.Context) {
         return
     }
     if duplicate > 0 {
-        ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Username is already taken", "Username": username, "Password": password})
+        ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Username is already taken", "Username": username, "Password": password, "Re_enter_Password": re_enter_password})
+        return
+    }
+
+    // check whether confirm password matches
+    if password != re_enter_password{
+        ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password are not matching", "Username": username, "Password": password, "Re_enter_Password": re_enter_password})
         return
     }
  
