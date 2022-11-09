@@ -3,10 +3,14 @@ package service
 import (
 	"crypto/sha256"
     "net/http"
+    "strconv"
+    "regexp"
  
     "github.com/gin-gonic/gin"
 	database "todolist.go/db"
 )
+
+const MIN_PW_LEN = 8
  
 func NewUserForm(ctx *gin.Context) {
     ctx.HTML(http.StatusOK, "new_user_form.html", gin.H{"Title": "Register user"})
@@ -58,6 +62,26 @@ func RegisterUser(ctx *gin.Context) {
         ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password are not matching", "Username": username, "Password": password, "Re_enter_Password": re_enter_password})
         return
     }
+
+    errStmt := ""
+    badPwFlag := 0
+    // check password
+    if len(password) < MIN_PW_LEN{
+        badPwFlag = 1
+        errStmt = "password should be minimum " +strconv.Itoa(MIN_PW_LEN) + " characters. "
+        //ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "password should be minimum " +strconv.Itoa(MIN_PW_LEN) + " characters", "Username": username, "Password": password, "Re_enter_Password": re_enter_password})
+        //return
+    }
+
+    if !(check_regexp(`[a-z]`, password) && check_regexp(`[A-Z]`, password) && check_regexp(`[0-9]`, password)){
+        badPwFlag = 1
+        errStmt = errStmt + "password must contain at least one lowercase letter, one uppercase letter, and one number"
+    }
+    if badPwFlag == 1{
+        ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": errStmt, "Username": username, "Password": password, "Re_enter_Password": re_enter_password})
+        return
+    }
+
  
     // DB への保存
     result, err := db.Exec("INSERT INTO users(name, password) VALUES (?, ?)", username, hash(password))
@@ -75,4 +99,8 @@ func RegisterUser(ctx *gin.Context) {
         return
     }
     ctx.JSON(http.StatusOK, user)
+}
+
+func check_regexp(reg, str string) bool{
+    return regexp.MustCompile(reg).Match([]byte(str))
 }
