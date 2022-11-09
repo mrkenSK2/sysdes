@@ -3,9 +3,13 @@
 {{ if .Error }}
 <p><font color="#FF0000">{{ .Error }}</font><p>
 {{ end }}
+<link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
 <form action="/user/new" method="POST">
     <label>ユーザ名: </label><input type="text" name="username" value="{{ .Username }}" required><br>
-    <label>パスワード: </label><input type="text" name="password" value="{{ .Password }}" required><br>
+    <label>パスワード: </label><input type="password" id="password" name="password" value="{{ .Password }}" required>
+    <i id="eyeButton" class="fa fa-eye" onclick="pushEyeButton()"></i>
+    <br>
+    <label>パスワード（再入力）: </label><input type="password" id="re_enter_password" name="re_enter_password" value="{{ .Re_enter_Password }}" required><br>
     <input type="submit" value="登録">
 </form>
 {{ template "footer" }}
