@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+    "github.com/gin-contrib/sessions"
 	database "todolist.go/db"
 )
 
@@ -18,6 +19,8 @@ func TaskList(ctx *gin.Context) {
 		return
 	}
 
+    userID := sessions.Default(ctx).Get("user")
+
     // Get query parameter
     kw := ctx.Query("kw")
     done := ctx.Query("done")
@@ -25,23 +28,24 @@ func TaskList(ctx *gin.Context) {
 
 	// Get tasks in DB
 	var tasks []database.Task
+    query := "SELECT id, title, created_at, is_done FROM tasks INNER JOIN ownership ON task_id = id WHERE user_id = ?"
 
     switch{
         case kw != "":
             if(done=="on" && notdone=="on" || (done!="on" && notdone!="on")){
-                err = db.Select(&tasks, "SELECT * FROM tasks WHERE title LIKE ?", "%" + kw + "%")
+                err = db.Select(&tasks, query + " AND title LIKE ?", userID, "%" + kw + "%")
             }else if(done=="on"){
-                err = db.Select(&tasks, "SELECT * FROM tasks WHERE title LIKE ? AND is_done = 1", "%" + kw + "%")
+                err = db.Select(&tasks, query + " AND title LIKE ? AND is_done = 1", userID, "%" + kw + "%")
             }else{
-                err = db.Select(&tasks, "SELECT * FROM tasks WHERE title LIKE ? AND is_done = 0", "%" + kw + "%")
+                err = db.Select(&tasks, query + " AND title LIKE ? AND is_done = 0", userID, "%" + kw + "%")
             }
         default:
             if(done=="on" && notdone=="on" || done!="on" && notdone!="on"){
-                err = db.Select(&tasks, "SELECT * FROM tasks") // Use DB#Select for multiple entries
+                err = db.Select(&tasks, query, userID) // Use DB#Select for multiple entries
             }else if(done=="on"){
-                err = db.Select(&tasks, "SELECT * FROM tasks WHERE is_done = 1")
+                err = db.Select(&tasks, query + " AND is_done = 1", userID)
             }else{
-                err = db.Select(&tasks, "SELECT * FROM tasks WHERE is_done = 0")
+                err = db.Select(&tasks, query + " AND is_done = 0", userID)
             }
     }
     if err != nil {
