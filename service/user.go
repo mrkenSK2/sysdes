@@ -100,7 +100,7 @@ func RegisterUser(ctx *gin.Context) {
         Error(http.StatusInternalServerError, err.Error())(ctx)
         return
     }
-    ctx.JSON(http.StatusOK, user)
+    ctx.HTML(http.StatusOK, "index.html", gin.H{"Title": "HOME"})
 }
 
 func check_regexp(reg, str string) bool{
