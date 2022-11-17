@@ -147,9 +147,17 @@ func Login(ctx *gin.Context) {
 
 func LoginCheck(ctx *gin.Context) {
     if sessions.Default(ctx).Get(userkey) == nil {
-        ctx.Redirect(http.StatusFound, "/login")
+        ctx.Redirect(http.StatusFound, "/user/login")
         ctx.Abort()
     } else {
         ctx.Next()
     }
+}
+
+func Logout(ctx *gin.Context) {
+    session := sessions.Default(ctx)
+    session.Clear()
+    //session.Options(sessions.Options{MaxAge: -1})
+    session.Save()
+    ctx.Redirect(http.StatusFound, "/")
 }

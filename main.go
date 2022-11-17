@@ -39,8 +39,20 @@ func main() {
 	// routing
 	engine.Static("/assets", "./assets")
 	engine.GET("/", service.Home)
-	engine.GET("/list", service.TaskList)
-	engine.GET("/task/:id", service.ShowTask) // ":id" is a parameter
+	engine.GET("/list", service.LoginCheck, service.TaskList)
+
+
+	taskGroup := engine.Group("/task")
+    taskGroup.Use(service.LoginCheck)
+    {
+        taskGroup.GET("/:id", service.ShowTask)
+        taskGroup.GET("/new", service.NewTaskForm)
+        taskGroup.POST("/new", service.RegisterTask)
+        taskGroup.GET("/edit/:id", service.EditTaskForm)
+        taskGroup.POST("/edit/:id", service.UpdateTask)
+        taskGroup.GET("/delete/:id", service.DeleteTask)
+    }
+	/*engine.GET("/task/:id", service.ShowTask) // ":id" is a parameter
 
 	// add new task
 	engine.GET("/task/new", service.NewTaskForm)
@@ -52,7 +64,7 @@ func main() {
 	
 	// delete existing task
     engine.GET("/task/delete/:id", service.DeleteTask)
-
+*/
 	// register user
 	engine.GET("/user/new", service.NewUserForm)
     engine.POST("/user/new", service.RegisterUser)
@@ -60,6 +72,9 @@ func main() {
 	// user login
 	engine.GET("/user/login", service.LoginForm)
     engine.POST("/user/login", service.Login)
+
+	// user logout
+	engine.POST("/user/logout", service.Logout)
 
 	// start server
 	engine.Run(fmt.Sprintf(":%d", port))
