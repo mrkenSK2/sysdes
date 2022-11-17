@@ -59,7 +59,7 @@ func main() {
 
 	// user login
 	engine.GET("/user/login", service.LoginForm)
-    engine.POST("/login", service.Login)
+    engine.POST("/user/login", service.Login)
 
 	// start server
 	engine.Run(fmt.Sprintf(":%d", port))
