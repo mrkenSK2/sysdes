@@ -92,6 +92,7 @@ func NewTaskForm(ctx *gin.Context) {
 }
 
 func RegisterTask(ctx *gin.Context) {
+    userID := sessions.Default(ctx).Get("user")
     // Get task title
     title, exist := ctx.GetPostForm("title")
     if !exist {
@@ -109,12 +110,28 @@ func RegisterTask(ctx *gin.Context) {
         Error(http.StatusInternalServerError, err.Error())(ctx)
         return
     }
+
+    tx := db.MustBegin()
 	// Create new data with given title on DB
-    result, err := db.Exec("INSERT INTO tasks (title, detail) VALUES (?, ?)", title, detail)
+    result, err := tx.Exec("INSERT INTO tasks (title, detail) VALUES (?, ?)", title, detail)
     if err != nil {
         Error(http.StatusInternalServerError, err.Error())(ctx)
         return
     }
+    taskID, err := result.LastInsertId()
+    if err != nil {
+        tx.Rollback()
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+
+    _, err = tx.Exec("INSERT INTO ownership (user_id, task_id) VALUES (?, ?)", userID, taskID)
+    if err != nil {
+        tx.Rollback()
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    tx.Commit()
 	 // Render status
 	 path := "/list"  // デフォルトではタスク一覧ページへ戻る
 	 if id, err := result.LastInsertId(); err == nil {

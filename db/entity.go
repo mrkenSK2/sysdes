@@ -21,3 +21,8 @@ type Task struct {
 	IsDone    bool      `db:"is_done"`
 	Detail    string    `db:"detail"`
 }
+
+type Ownership struct {
+	User_id   uint64   `db:"user_id"`
+	Task_id   uint64   `db:"task_id"`
+}

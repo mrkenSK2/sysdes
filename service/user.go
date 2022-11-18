@@ -157,7 +157,7 @@ func LoginCheck(ctx *gin.Context) {
 func Logout(ctx *gin.Context) {
     session := sessions.Default(ctx)
     session.Clear()
-    //session.Options(sessions.Options{MaxAge: -1})
+    session.Options(sessions.Options{Path: "/", MaxAge: -1})
     session.Save()
     ctx.Redirect(http.StatusFound, "/")
 }
@@ -165,7 +165,10 @@ func Logout(ctx *gin.Context) {
 func UserCheck(ctx *gin.Context) {
     user_id := sessions.Default(ctx).Get(userkey)
     id, _ := strconv.Atoi(ctx.Param("id"))
-	if user_id != id {
+    db, err := database.GetConnection()
+    var pair database.Ownership
+    err = db.Get(&pair, "SELECT user_id, task_id FROM ownership WHERE user_id = ? AND task_id = ?", user_id, id)
+	if err != nil{
 		//Error(http.StatusForbidden, err.Error())(ctx)
         //ctx.Redirect(http.StatusFound, "/")//仮おき
         ctx.HTML(http.StatusOK, "no_permission.html", gin.H{"Title": "No permission"})
