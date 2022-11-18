@@ -161,3 +161,16 @@ func Logout(ctx *gin.Context) {
     session.Save()
     ctx.Redirect(http.StatusFound, "/")
 }
+
+func UserCheck(ctx *gin.Context) {
+    user_id := sessions.Default(ctx).Get(userkey)
+    id, _ := strconv.Atoi(ctx.Param("id"))
+	if user_id != id {
+		//Error(http.StatusForbidden, err.Error())(ctx)
+        //ctx.Redirect(http.StatusFound, "/")//仮おき
+        ctx.HTML(http.StatusOK, "no_permission.html", gin.H{"Title": "No permission"})
+		ctx.Abort()
+	} else {
+        ctx.Next()
+    }
+}

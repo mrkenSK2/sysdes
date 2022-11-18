@@ -45,12 +45,20 @@ func main() {
 	taskGroup := engine.Group("/task")
     taskGroup.Use(service.LoginCheck)
     {
-        taskGroup.GET("/:id", service.ShowTask)
+        //taskGroup.GET("/:id", service.ShowTask)
         taskGroup.GET("/new", service.NewTaskForm)
         taskGroup.POST("/new", service.RegisterTask)
-        taskGroup.GET("/edit/:id", service.EditTaskForm)
+        //taskGroup.GET("/edit/:id", service.EditTaskForm)
         taskGroup.POST("/edit/:id", service.UpdateTask)
-        taskGroup.GET("/delete/:id", service.DeleteTask)
+        //taskGroup.GET("/delete/:id", service.DeleteTask)
+    }
+
+	taskGroupGuard := engine.Group("/task")
+    taskGroupGuard.Use(service.LoginCheck, service.UserCheck)
+    {
+        taskGroupGuard.GET("/:id", service.ShowTask)
+        taskGroupGuard.GET("/edit/:id", service.EditTaskForm)
+        taskGroupGuard.GET("/delete/:id", service.DeleteTask)
     }
 	/*engine.GET("/task/:id", service.ShowTask) // ":id" is a parameter
 
@@ -74,7 +82,7 @@ func main() {
     engine.POST("/user/login", service.Login)
 
 	// user logout
-	engine.POST("/user/logout", service.Logout)
+	engine.GET("/user/logout", service.Logout)
 
 	// start server
 	engine.Run(fmt.Sprintf(":%d", port))
