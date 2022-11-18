@@ -177,3 +177,71 @@ func UserCheck(ctx *gin.Context) {
         ctx.Next()
     }
 }
+
+func LogoutAndDelete(ctx *gin.Context) {
+    session := sessions.Default(ctx)
+    session.Clear()
+    session.Options(sessions.Options{Path: "/", MaxAge: -1})
+    session.Save()
+    ctx.Redirect(http.StatusFound, "/user/delete")
+}
+func DeleteUser(ctx *gin.Context) {
+    //var task database.Task
+    user_id := sessions.Default(ctx).Get(userkey)
+    db, err := database.GetConnection()
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    
+    db.Exec("DELETE FROM tasks WHERE id IN (SELECT task_id FROM ownership WHERE user_id = ?", user_id)
+    db.Exec("DELETE FROM users WHERE id = ?", user_id)
+    db.Exec("DELETE FROM ownership WHERE user_id = ?", user_id)
+    
+    /*tx := db.MustBegin()
+    result, err := tx.Exec("INSERT INTO tasks (title) VALUES (?)", title)
+    if err != nil {
+        tx.Rollback()
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    taskID, err := result.LastInsertId()
+    if err != nil {
+        tx.Rollback()
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    _, err = tx.Exec("INSERT INTO ownership (user_id, task_id) VALUES (?, ?)", userID, taskID)
+    if err != nil {
+        tx.Rollback()
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    tx.Commit()*/
+    
+    /*err = db.Get(&pair, "SELECT user_id, task_id FROM ownership WHERE user_id = ? AND task_id = ?", user_id, id)
+	if err != nil{
+    // ID の取得
+    id, err := strconv.Atoi(ctx.Param("id"))
+    if err != nil {
+        Error(http.StatusBadRequest, err.Error())(ctx)
+        return
+    }
+    // Get DB connection
+    db, err := database.GetConnection()
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    // Delete the task from DB
+    _,err = db.Exec("DELETE FROM tasks WHERE id=?", id)
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }*/
+    session := sessions.Default(ctx)
+    session.Clear()
+    session.Options(sessions.Options{Path: "/", MaxAge: -1})
+    session.Save()
+    ctx.Redirect(http.StatusFound, "/")
+}

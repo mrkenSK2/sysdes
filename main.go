@@ -84,6 +84,9 @@ func main() {
 	// user logout
 	engine.GET("/user/logout", service.Logout)
 
+	// delete user
+	engine.GET("/user/delete", service.DeleteUser)
+
 	// start server
 	engine.Run(fmt.Sprintf(":%d", port))
 }
