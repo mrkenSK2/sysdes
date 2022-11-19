@@ -1,0 +1,11 @@
+{{ template "header" . }}
+<h1>ユーザ情報編集</h1>
+<form action="/user/edit" method="POST" onSubmit="return confirm_userUpdate()">
+    <label>新しいユーザ名: </label><input type="text" name="username" value="{{ .User.Name }}" required><br>
+    <label>新しいパスワード: </label><input type="password" id="new_password" name="new_password" value="{{ .NewPassword }}" required>
+    <br>
+    <label>新しいパスワード（再入力）: </label><input type="password" id="re_enter_new_password" name="re_enter_password" value="{{ .Re_enter_NewPassword }}" required><br>
+    <input type="submit" value="更新">
+    <a href="/"><button type="button">戻る</button></a>
+</form>
+{{ template "footer" }}

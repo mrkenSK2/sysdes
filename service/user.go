@@ -1,6 +1,7 @@
 package service
  
 import (
+    "fmt"
 	"crypto/sha256"
     "encoding/hex"
     "net/http"
@@ -152,6 +153,38 @@ func LoginCheck(ctx *gin.Context) {
     } else {
         ctx.Next()
     }
+}
+
+func EditUserForm(ctx *gin.Context) {
+    // ID の取得
+    /*var user database.User
+    err = db.Get(&user, "SELECT id, name, password FROM users WHERE name = ?", username)
+    if err != nil {
+        ctx.HTML(http.StatusBadRequest, "login.html", gin.H{"Title": "Login", "Username": username, "Error": "No such user"})
+        return
+    }*/
+
+
+    // idで混ざんない？？？？？？？？？？？
+    //id, err := strconv.Atoi(ctx.Param("name"))
+    user_id := sessions.Default(ctx).Get(userkey)
+    
+    // Get DB connection
+    db, err := database.GetConnection()
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    // Get target user
+    var user database.User
+    err = db.Get(&user, "SELECT * FROM users WHERE id=?", user_id)
+    if err != nil {
+        Error(http.StatusBadRequest, err.Error())(ctx)
+        return
+    }
+    // Render edit form
+    ctx.HTML(http.StatusOK, "form_edit_user.html",
+        gin.H{"Title": fmt.Sprintf("Edit user"), "User": user})
 }
 
 func Logout(ctx *gin.Context) {

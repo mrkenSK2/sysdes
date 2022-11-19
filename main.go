@@ -81,6 +81,9 @@ func main() {
 	engine.GET("/user/login", service.LoginForm)
     engine.POST("/user/login", service.Login)
 
+	engine.GET("/user/edit", service.EditUserForm)
+    engine.POST("/user/edit", service.UpdateUser)
+
 	// user logout
 	engine.GET("/user/logout", service.Logout)
 

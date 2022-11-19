@@ -28,4 +28,12 @@ function pushEyeButton() {
         eyeBtn.className = "fa fa-eye-slash";
     }
 }
-  
+
+const confirm_userUpdate = () => {
+    // 練習問題 7-2
+    if(window.confirm(`ユーザ情報を更新します．よろしいですか？`)) {
+        return true;
+    }else{
+        return false;
+    }
+}
