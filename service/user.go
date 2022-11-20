@@ -187,6 +187,114 @@ func EditUserForm(ctx *gin.Context) {
         gin.H{"Title": fmt.Sprintf("Edit user"), "User": user})
 }
 
+func UpdateUser(ctx *gin.Context){
+    user_id := sessions.Default(ctx).Get(userkey)
+    db, err := database.GetConnection()
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    // Get target user
+    var user database.User
+    err = db.Get(&user, "SELECT * FROM users WHERE id=?", user_id)
+    if err != nil {
+        Error(http.StatusBadRequest, err.Error())(ctx)
+        return
+    }
+    
+    
+    /*id, err := strconv.Atoi(ctx.Param("id"))
+    if err != nil {
+        Error(http.StatusBadRequest, err.Error())(ctx)
+        return
+    }*/
+    // Get task title
+    username := ctx.PostForm("username")
+    old_password := ctx.PostForm("old_password")
+    new_password := ctx.PostForm("new_password")
+    re_enter_new_password := ctx.PostForm("re_enter_new_password")
+    user_change_flag := false
+    pw_change_flag := false
+    //errStmt := ""
+    
+
+    if(!((old_password=="" && new_password=="" && re_enter_new_password =="") || (old_password!="" && new_password!="" && re_enter_new_password !=""))){
+        ctx.HTML(http.StatusBadRequest, "form_edit_user.html", gin.H{"Title": "Edit user", "Error": "パスワード関連の3つの欄は全部空白か全部入力にしてください", "User": user})
+        return
+    }
+
+    if(username=="" && old_password=="" && new_password=="" && re_enter_new_password ==""){
+        ctx.HTML(http.StatusBadRequest, "form_edit_user.html", gin.H{"Title": "Edit user", "Error": "更新しないなら戻るボタンを押してください", "User": user})
+        return
+    }
+    if(username!=""){
+        user_change_flag = true
+        var duplicate int
+        err = db.Get(&duplicate, "SELECT COUNT(*) FROM users WHERE name=?", username)
+        if err != nil {
+            Error(http.StatusInternalServerError, err.Error())(ctx)
+            return
+        }
+        if duplicate > 0 {
+            ctx.HTML(http.StatusBadRequest, "form_edit_user.html", gin.H{"Title": "Edit user", "Error": "Username is already taken", "User": user})
+            return
+        }
+    }
+    if(old_password!="" && new_password!="" && re_enter_new_password !=""){
+        pw_change_flag = true
+        // パスワードの照合
+    if hex.EncodeToString(user.Password) != hex.EncodeToString(hash(old_password)) {
+        ctx.HTML(http.StatusBadRequest, "form_edit_user.html", gin.H{"Title": "Edit user",  "Error": "Old password are not matching", "User": user})
+        return
+    }
+    if new_password != re_enter_new_password{
+        ctx.HTML(http.StatusBadRequest, "form_edit_user.html", gin.H{"Title": "Edit user", "Error": "New password are not matching", "User": user})
+        return
+    }
+    errStmt := ""
+    badPwFlag := false
+    // check password
+    if len(new_password) < MIN_PW_LEN{
+        badPwFlag = true
+        errStmt = "password should be minimum " +strconv.Itoa(MIN_PW_LEN) + " characters. "
+        //ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "password should be minimum " +strconv.Itoa(MIN_PW_LEN) + " characters", "Username": username, "Password": password, "Re_enter_Password": re_enter_password})
+        //return
+    }
+
+    if !(check_regexp(`[a-z]`, new_password) && check_regexp(`[A-Z]`, new_password) && check_regexp(`[0-9]`, new_password)){
+        badPwFlag = true
+        errStmt = errStmt + "password must contain at least one lowercase letter, one uppercase letter, and one number"
+    }
+    if badPwFlag{
+        ctx.HTML(http.StatusBadRequest, "form_edit_user.html", gin.H{"Title": "Edit user", "Error": errStmt, "User": user})
+        return
+    }
+    }
+        
+    
+    // update user
+    if(user_change_flag && pw_change_flag){
+        _, err = db.Exec("UPDATE users SET name=?,password=? WHERE id=?", username, hash(new_password), user_id)
+        if err != nil {
+            Error(http.StatusInternalServerError, err.Error())(ctx)
+            return
+        }
+    }else if(user_change_flag){
+        _, err = db.Exec("UPDATE users SET name=? WHERE id=?", username, user_id)
+        if err != nil {
+            Error(http.StatusInternalServerError, err.Error())(ctx)
+            return
+        }
+    }else{
+        _, err = db.Exec("UPDATE users SET password=? WHERE id=?", hash(new_password), user_id)
+        if err != nil {
+            Error(http.StatusInternalServerError, err.Error())(ctx)
+            return
+        }
+    }
+	ctx.Redirect(http.StatusFound, "/list")
+}
+
 func Logout(ctx *gin.Context) {
     session := sessions.Default(ctx)
     session.Clear()
@@ -211,13 +319,13 @@ func UserCheck(ctx *gin.Context) {
     }
 }
 
-func LogoutAndDelete(ctx *gin.Context) {
+/*func LogoutAndDelete(ctx *gin.Context) {
     session := sessions.Default(ctx)
     session.Clear()
     session.Options(sessions.Options{Path: "/", MaxAge: -1})
     session.Save()
     ctx.Redirect(http.StatusFound, "/user/delete")
-}
+}*/
 func DeleteUser(ctx *gin.Context) {
     //var task database.Task
     user_id := sessions.Default(ctx).Get(userkey)
