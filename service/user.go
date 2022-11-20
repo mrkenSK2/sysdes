@@ -72,8 +72,6 @@ func RegisterUser(ctx *gin.Context) {
     if len(password) < MIN_PW_LEN{
         badPwFlag = 1
         errStmt = "password should be minimum " +strconv.Itoa(MIN_PW_LEN) + " characters. "
-        //ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "password should be minimum " +strconv.Itoa(MIN_PW_LEN) + " characters", "Username": username, "Password": password, "Re_enter_Password": re_enter_password})
-        //return
     }
 
     if !(check_regexp(`[a-z]`, password) && check_regexp(`[A-Z]`, password) && check_regexp(`[0-9]`, password)){
@@ -157,16 +155,6 @@ func LoginCheck(ctx *gin.Context) {
 
 func EditUserForm(ctx *gin.Context) {
     // ID の取得
-    /*var user database.User
-    err = db.Get(&user, "SELECT id, name, password FROM users WHERE name = ?", username)
-    if err != nil {
-        ctx.HTML(http.StatusBadRequest, "login.html", gin.H{"Title": "Login", "Username": username, "Error": "No such user"})
-        return
-    }*/
-
-
-    // idで混ざんない？？？？？？？？？？？
-    //id, err := strconv.Atoi(ctx.Param("name"))
     user_id := sessions.Default(ctx).Get(userkey)
     
     // Get DB connection
@@ -202,12 +190,6 @@ func UpdateUser(ctx *gin.Context){
         return
     }
     
-    
-    /*id, err := strconv.Atoi(ctx.Param("id"))
-    if err != nil {
-        Error(http.StatusBadRequest, err.Error())(ctx)
-        return
-    }*/
     // Get task title
     username := ctx.PostForm("username")
     old_password := ctx.PostForm("old_password")
@@ -215,9 +197,7 @@ func UpdateUser(ctx *gin.Context){
     re_enter_new_password := ctx.PostForm("re_enter_new_password")
     user_change_flag := false
     pw_change_flag := false
-    //errStmt := ""
     
-
     if(!((old_password=="" && new_password=="" && re_enter_new_password =="") || (old_password!="" && new_password!="" && re_enter_new_password !=""))){
         ctx.HTML(http.StatusBadRequest, "form_edit_user.html", gin.H{"Title": "Edit user", "Error": "パスワード関連の3つの欄は全部空白か全部入力にしてください", "User": user})
         return
@@ -257,8 +237,6 @@ func UpdateUser(ctx *gin.Context){
     if len(new_password) < MIN_PW_LEN{
         badPwFlag = true
         errStmt = "password should be minimum " +strconv.Itoa(MIN_PW_LEN) + " characters. "
-        //ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "password should be minimum " +strconv.Itoa(MIN_PW_LEN) + " characters", "Username": username, "Password": password, "Re_enter_Password": re_enter_password})
-        //return
     }
 
     if !(check_regexp(`[a-z]`, new_password) && check_regexp(`[A-Z]`, new_password) && check_regexp(`[0-9]`, new_password)){
@@ -310,8 +288,6 @@ func UserCheck(ctx *gin.Context) {
     var pair database.Ownership
     err = db.Get(&pair, "SELECT user_id, task_id FROM ownership WHERE user_id = ? AND task_id = ?", user_id, id)
 	if err != nil{
-		//Error(http.StatusForbidden, err.Error())(ctx)
-        //ctx.Redirect(http.StatusFound, "/")//仮おき
         ctx.HTML(http.StatusOK, "no_permission.html", gin.H{"Title": "No permission"})
 		ctx.Abort()
 	} else {
@@ -319,13 +295,6 @@ func UserCheck(ctx *gin.Context) {
     }
 }
 
-/*func LogoutAndDelete(ctx *gin.Context) {
-    session := sessions.Default(ctx)
-    session.Clear()
-    session.Options(sessions.Options{Path: "/", MaxAge: -1})
-    session.Save()
-    ctx.Redirect(http.StatusFound, "/user/delete")
-}*/
 func DeleteUser(ctx *gin.Context) {
     //var task database.Task
     user_id := sessions.Default(ctx).Get(userkey)
@@ -334,52 +303,27 @@ func DeleteUser(ctx *gin.Context) {
         Error(http.StatusInternalServerError, err.Error())(ctx)
         return
     }
-    
-    db.Exec("DELETE FROM tasks WHERE id IN (SELECT task_id FROM ownership WHERE user_id = ?", user_id)
-    db.Exec("DELETE FROM users WHERE id = ?", user_id)
-    db.Exec("DELETE FROM ownership WHERE user_id = ?", user_id)
-    
-    /*tx := db.MustBegin()
-    result, err := tx.Exec("INSERT INTO tasks (title) VALUES (?)", title)
+    tx := db.MustBegin()
+    _, err = tx.Exec("DELETE FROM tasks WHERE id IN (SELECT task_id FROM ownership WHERE user_id = ?)", user_id)
     if err != nil {
         tx.Rollback()
         Error(http.StatusInternalServerError, err.Error())(ctx)
         return
     }
-    taskID, err := result.LastInsertId()
+    _, err = tx.Exec("DELETE FROM users WHERE id = ?", user_id)
     if err != nil {
         tx.Rollback()
         Error(http.StatusInternalServerError, err.Error())(ctx)
         return
     }
-    _, err = tx.Exec("INSERT INTO ownership (user_id, task_id) VALUES (?, ?)", userID, taskID)
+    _, err = tx.Exec("DELETE FROM ownership WHERE user_id = ?", user_id)
     if err != nil {
         tx.Rollback()
         Error(http.StatusInternalServerError, err.Error())(ctx)
         return
     }
-    tx.Commit()*/
+    tx.Commit()
     
-    /*err = db.Get(&pair, "SELECT user_id, task_id FROM ownership WHERE user_id = ? AND task_id = ?", user_id, id)
-	if err != nil{
-    // ID の取得
-    id, err := strconv.Atoi(ctx.Param("id"))
-    if err != nil {
-        Error(http.StatusBadRequest, err.Error())(ctx)
-        return
-    }
-    // Get DB connection
-    db, err := database.GetConnection()
-    if err != nil {
-        Error(http.StatusInternalServerError, err.Error())(ctx)
-        return
-    }
-    // Delete the task from DB
-    _,err = db.Exec("DELETE FROM tasks WHERE id=?", id)
-    if err != nil {
-        Error(http.StatusInternalServerError, err.Error())(ctx)
-        return
-    }*/
     session := sessions.Default(ctx)
     session.Clear()
     session.Options(sessions.Options{Path: "/", MaxAge: -1})
