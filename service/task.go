@@ -28,14 +28,14 @@ func TaskList(ctx *gin.Context) {
 
 	// Get tasks in DB
 	var tasks []database.Task
-    query := "SELECT id, title, created_at, is_done FROM tasks INNER JOIN ownership ON task_id = id WHERE user_id = ?"
+    query := "SELECT id, title, created_at, is_done, detail, deadline, importance FROM tasks INNER JOIN ownership ON task_id = id WHERE user_id = ?"
 
     switch{
         case kw != "":
             if(done=="on" && notdone=="on" || (done!="on" && notdone!="on")){
                 err = db.Select(&tasks, query + " AND title LIKE ?", userID, "%" + kw + "%")
             }else if(done=="on"){
-                err = db.Select(&tasks, query + " AND title LIKE ? AND is_done = 1", userID, "%" + kw + "%")
+                err = db.Select(&tasks, query + " AND title LIKE ? AND  = 1", userID, "%" + kw + "%")
             }else{
                 err = db.Select(&tasks, query + " AND title LIKE ? AND is_done = 0", userID, "%" + kw + "%")
             }
@@ -43,9 +43,9 @@ func TaskList(ctx *gin.Context) {
             if(done=="on" && notdone=="on" || done!="on" && notdone!="on"){
                 err = db.Select(&tasks, query, userID) // Use DB#Select for multiple entries
             }else if(done=="on"){
-                err = db.Select(&tasks, query + " AND is_done = 1", userID)
+                err = db.Select(&tasks, query + " AND  = 1", userID)
             }else{
-                err = db.Select(&tasks, query + " AND is_done = 0", userID)
+                err = db.Select(&tasks, query + " AND  = 0", userID)
             }
     }
     if err != nil {
@@ -55,6 +55,30 @@ func TaskList(ctx *gin.Context) {
 
 	// Render tasks
 	ctx.HTML(http.StatusOK, "task_list.html", gin.H{"Title": "Task list", "Tasks": tasks, "Kw": kw, "Done": done, "NotDone": notdone})
+}
+
+func Sort(ctx *gin.Context) {
+	// Get DB connection
+	db, err := database.GetConnection()
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+
+    userID := sessions.Default(ctx).Get("user")
+
+	// Get tasks in DB
+	var tasks []database.Task
+
+    query := "SELECT id, title, created_at, detail, deadline, importance FROM tasks INNER JOIN ownership ON task_id = id WHERE user_id = ? ORDER BY deadline"
+    err = db.Select(&tasks, query, userID)
+    if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+
+	// Render tasks
+	ctx.HTML(http.StatusOK, "task_list.html", gin.H{"Title": "Task list", "Tasks": tasks})
 }
 
 // ShowTask renders a task with given ID
@@ -104,6 +128,12 @@ func RegisterTask(ctx *gin.Context) {
         Error(http.StatusBadRequest, "Problem in detail")(ctx)
         return
     }
+    deadline, exist := ctx.GetPostForm("deadline")
+    if !exist {
+        Error(http.StatusBadRequest, "Problem in deadline")(ctx)
+        return
+    }
+    
     // Get DB connection
     db, err := database.GetConnection()
     if err != nil {
@@ -113,7 +143,7 @@ func RegisterTask(ctx *gin.Context) {
 
     tx := db.MustBegin()
 	// Create new data with given title on DB
-    result, err := tx.Exec("INSERT INTO tasks (title, detail) VALUES (?, ?)", title, detail)
+    result, err := tx.Exec("INSERT INTO tasks (title, detail, deadline) VALUES (?, ?, ?)", title, detail, deadline)
     if err != nil {
         Error(http.StatusInternalServerError, err.Error())(ctx)
         return
@@ -192,6 +222,17 @@ func UpdateTask(ctx *gin.Context) {
         Error(http.StatusBadRequest, "problem in detail")(ctx)
         return
     }
+    deadline, exist := ctx.GetPostForm("deadline")
+    if !exist {
+        Error(http.StatusBadRequest, "Problem in deadline")(ctx)
+        return
+    }
+    importance := false
+    importance_check, exist := ctx.GetPostForm("importance")
+    if exist && (importance_check == "on"){
+        importance = true
+    }
+    
     // Get DB connection
     db, err := database.GetConnection()
     if err != nil {
@@ -199,7 +240,7 @@ func UpdateTask(ctx *gin.Context) {
         return
     }
 	// update task
-    _, err = db.Exec("UPDATE tasks SET title=?,is_done=?,detail=? WHERE id=?", title, is_done, detail, id)
+    _, err = db.Exec("UPDATE tasks SET title=?,is_done=?,detail=?, deadline=?, importance=? WHERE id=?", title, is_done, detail, deadline, importance, id)
     if err != nil {
         Error(http.StatusInternalServerError, err.Error())(ctx)
         return

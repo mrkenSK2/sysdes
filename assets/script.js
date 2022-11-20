@@ -30,10 +30,15 @@ function pushEyeButton() {
 }
 
 const confirm_userUpdate = () => {
-    // 練習問題 7-2
     if(window.confirm(`ユーザ情報を更新します．よろしいですか？`)) {
         return true;
     }else{
         return false;
+    }
+}
+
+const confirm_withdrawal = () => {
+    if(window.confirm(`ユーザ情報を削除します．よろしいですか？`)) {
+        location.href = `/user/delete`;
     }
 }

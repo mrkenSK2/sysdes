@@ -8,6 +8,9 @@
         <input type="radio" name="is_done" value="f" {{ if not .Task.IsDone }}checked{{ end }}><label>未完了</label><br>
         <dt class="task_dt">説明文</dt>
         <dd><textarea name="detail">{{ .Task.Detail }}</textarea></dd>
+        <dt class="task_dt">締切</dt>
+        <dd><input type="date" name="deadline" required></dd>
+        <input type="checkbox" name="importance" {{ if eq .Task.Importance true}}checked{{ end }}><label>重要</label>
     </dl>
     <input type="submit" value="更新">
     <a href="/task/{{ .Task.ID }}"><button type="button">戻る</button></a>

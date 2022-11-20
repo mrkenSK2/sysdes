@@ -41,6 +41,7 @@ func main() {
 	engine.GET("/", service.Home)
 	engine.GET("/list", service.LoginCheck, service.TaskList)
 
+	engine.GET("/task/sort", service.LoginCheck, service.Sort)
 
 	taskGroup := engine.Group("/task")
     taskGroup.Use(service.LoginCheck)

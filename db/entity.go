@@ -20,6 +20,8 @@ type Task struct {
 	CreatedAt time.Time `db:"created_at"`
 	IsDone    bool      `db:"is_done"`
 	Detail    string    `db:"detail"`
+	Deadline time.Time `db:"deadline"`
+	Importance    bool      `db:"importance"`
 }
 
 type Ownership struct {
