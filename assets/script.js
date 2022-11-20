@@ -42,3 +42,9 @@ const confirm_withdrawal = () => {
         location.href = `/user/delete`;
     }
 }
+
+const confirm_logout = () => {
+    if(window.confirm(`ログアウトします．よろしいですか？`)) {
+        location.href = `/user/logout`;
+    }
+}

@@ -35,7 +35,7 @@ func TaskList(ctx *gin.Context) {
             if(done=="on" && notdone=="on" || (done!="on" && notdone!="on")){
                 err = db.Select(&tasks, query + " AND title LIKE ?", userID, "%" + kw + "%")
             }else if(done=="on"){
-                err = db.Select(&tasks, query + " AND title LIKE ? AND  = 1", userID, "%" + kw + "%")
+                err = db.Select(&tasks, query + " AND title LIKE ? AND is_done = 1", userID, "%" + kw + "%")
             }else{
                 err = db.Select(&tasks, query + " AND title LIKE ? AND is_done = 0", userID, "%" + kw + "%")
             }
@@ -43,9 +43,9 @@ func TaskList(ctx *gin.Context) {
             if(done=="on" && notdone=="on" || done!="on" && notdone!="on"){
                 err = db.Select(&tasks, query, userID) // Use DB#Select for multiple entries
             }else if(done=="on"){
-                err = db.Select(&tasks, query + " AND  = 1", userID)
+                err = db.Select(&tasks, query + " AND is_done = 1", userID)
             }else{
-                err = db.Select(&tasks, query + " AND  = 0", userID)
+                err = db.Select(&tasks, query + " AND is_done = 0", userID)
             }
     }
     if err != nil {
