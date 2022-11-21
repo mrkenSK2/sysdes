@@ -46,12 +46,9 @@ func main() {
 	taskGroup := engine.Group("/task")
     taskGroup.Use(service.LoginCheck)
     {
-        //taskGroup.GET("/:id", service.ShowTask)
         taskGroup.GET("/new", service.NewTaskForm)
         taskGroup.POST("/new", service.RegisterTask)
-        //taskGroup.GET("/edit/:id", service.EditTaskForm)
         taskGroup.POST("/edit/:id", service.UpdateTask)
-        //taskGroup.GET("/delete/:id", service.DeleteTask)
     }
 
 	taskGroupGuard := engine.Group("/task")
@@ -61,7 +58,6 @@ func main() {
         taskGroupGuard.GET("/edit/:id", service.EditTaskForm)
         taskGroupGuard.GET("/delete/:id", service.DeleteTask)
     }
-	/*engine.GET("/task/:id", service.ShowTask) // ":id" is a parameter
 
 	// add new task
 	engine.GET("/task/new", service.NewTaskForm)

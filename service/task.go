@@ -249,7 +249,6 @@ func UpdateTask(ctx *gin.Context) {
 }
 
 func DeleteTask(ctx *gin.Context) {
-    //var task database.Task
     // ID の取得
     id, err := strconv.Atoi(ctx.Param("id"))
     if err != nil {
