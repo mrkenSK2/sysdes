@@ -59,17 +59,6 @@ func main() {
         taskGroupGuard.GET("/delete/:id", service.DeleteTask)
     }
 
-	// add new task
-	engine.GET("/task/new", service.NewTaskForm)
-	engine.POST("/task/new", service.RegisterTask)
-	
-	// edit existing task
-	engine.GET("/task/edit/:id", service.EditTaskForm)
-    engine.POST("/task/edit/:id", service.UpdateTask)
-	
-	// delete existing task
-    engine.GET("/task/delete/:id", service.DeleteTask)
-*/
 	// register user
 	engine.GET("/user/new", service.NewUserForm)
     engine.POST("/user/new", service.RegisterUser)
